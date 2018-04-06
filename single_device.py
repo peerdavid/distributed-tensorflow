@@ -8,11 +8,6 @@ z = x * y
 
 # Start computation
 with tf.Session() as session:
-    writer = tf.summary.FileWriter('logs', session.graph)
     input_data = { x: 7 }
     result = session.run(z, input_data)
     print("Result: %d" % result)
-    writer.close()
-    
-    #writer = tf.summary.FileWriter('logs', session.graph)
-    #writer.close()
