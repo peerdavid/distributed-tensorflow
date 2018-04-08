@@ -7,7 +7,7 @@ y = tf.constant(5, name="y")
 z = x * y
 
 # Start computation
-with tf.Session() as session:
+with tf.Session() as sess:
     input_data = { x: 7 }
-    result = session.run(z, input_data)
+    result = sess.run(z, input_data)
     print("Result: %d" % result)
