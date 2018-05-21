@@ -59,22 +59,23 @@ def deepnn(x):
     with tf.name_scope('reshape'):
       x_image = tf.reshape(x, [-1, 28, 28, 1])
 
-    # First convolutional layer - maps one grayscale image to 32 feature maps.
+  # Model parallelism
+  with tf.device("gpu:0"):
     with tf.name_scope('conv1'):
       W_conv1 = weight_variable([5, 5, 1, 32])
       b_conv1 = bias_variable([32])
-      h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
-
-    # Pooling layer - downsamples by 2X.
+      h_conv1 = tf.nn.relu(
+        conv2d(x_image, W_conv1)+b_conv1)
+  with tf.device("cpu:0"):
     with tf.name_scope('pool1'):
       h_pool1 = max_pool_2x2(h_conv1)
 
   with tf.device("gpu:0"):
-    # Second convolutional layer -- maps 32 feature maps to 64.
+    # Second convolutional layer
     with tf.name_scope('conv2'):
       W_conv2 = weight_variable([5, 5, 32, 64])
       b_conv2 = bias_variable([64])
-      h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
+      h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2)+b_conv2)
 
     # Second pooling layer.
     with tf.name_scope('pool2'):
