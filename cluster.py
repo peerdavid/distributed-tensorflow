@@ -4,13 +4,13 @@
 #   https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10_multi_gpu_train.py
 
 # In-graph replication
-with tf.device("/job:ps/task:0/cpu:0")
+with tf.device("/job:ps/task:0")
     W = tf.Variable(...)
     b = tf.Variable(...)
 inputs = tf.split(0, num_workers, input)
 outputs = []
 for i in range(num_workers):
-    with tf.device("/job:worker/task:%d/gpu:0" % i):
+    with tf.device("/job:worker/task:%d" % i):
     outputs.append(tf.mtmul(input[i], W) + b)
 loss = cross_entropy(outputs)
 
@@ -18,10 +18,10 @@ loss = cross_entropy(outputs)
 # Between-graph replication
 # Note: Start on every client for different
 # worker task id
-with tf.device("/job:ps/task:0/cpu:0")
+with tf.device("/job:ps/task:0")
     W = tf.Variable(...)
     b = tf.Variable(...)
-with tf.device("/job:worker/task:0/gpu:0"):
+with tf.device("/job:worker/task:0"):
     output = tf.mtmul(input[i], W) + b
 loss = cross_entropy(output)
 
@@ -58,3 +58,16 @@ for i in xrange(FLAGS.num_gpus):
       tower_grads.append(grads)
 
 grads = average_gradients(tower_grads)
+
+
+# Describe the cluster
+cluster = tf.train.ClusterSpec({
+    "ps": [ "ps0.example.com:2222", ... ], 
+    "worker": [ "worker0.example.com:2222", ...],
+    ...
+})
+
+# Start server
+server = tf.train.Server(cluster, 
+                        job_name="worker",
+                        task_index=0)
